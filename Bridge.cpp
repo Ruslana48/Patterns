@@ -1,76 +1,75 @@
 #include <iostream>
-#include <string>
 
-//Product class
-class Computer{
-    private:
-        std::string cpu_;
-        std::string memory_;
-        std::string storage_;
-    public:
-        void setCPU(const std::string& cpu){
-            cpu_=cpu;
-        }
-        void setMemory(const std::string& memory){
-            memory_=memory;
-        }
-        void setStorage(const std::string& storage){
-            storage_=storage;
-        }
-        void display(){
-            std::cout << "CPU:" << cpu_ << std::endl;
-            std::cout << "Memory:" << memory_ << std::endl;
-            std::cout << "Storage:" << storage_ << std::endl;
-        }
+class Shape {
+public:
+    virtual void draw() = 0;
 };
 
-//Builder interface
-class ComputerBuilder{
-    public:
-        virtual void buildCPU(const std::string& cpu) = 0;
-        virtual void buildMemory(const std::string& memory) = 0;
-        virtual void buildStorage(const std::string& storage) = 0;
-        virtual Computer getResult() = 0;
+class Renderer {
+public:
+    virtual void render() = 0;
 };
 
-//Concreate Builder
-class DesktopComputerBuilder : public ComputerBuilder {
-    private:
-        Computer Computer_;
-    public:
-        DesktopComputerBuilder(){
-            Computer_ = Computer();
-        }
-        void buildCPU(const std::string& cpu) override {
-            Computer_.setCPU(cpu);
-        }
-        void buildMemory(const std::string& memory) override {
-            Computer_.setMemory(memory);
-        }
-        void buildStorage(const std::string& storage) override {
-            Computer_.setStorage(storage);
-        }
-        Computer getResult() override{
-            return Computer_;
-        }
+class VectorRenderer : public Renderer {
+public:
+    void render() override
+    {
+        std::cout << "Rendering as a vector\n";
+    }
 };
 
-//Director
-class ComputerAssembler{
-    public:
-        Computer assembleComputer(ComputerBuilder& builder){
-            builder.buildCPU("Intel i7");
-            builder.buildMemory("16GB");
-            builder.buildStorage("512GB SSD");
-            return builder.getResult();
-        }
+class RasterRenderer : public Renderer {
+public:
+    void render() override
+    {
+        std::cout << "Rendering as a raster\n";
+    }
 };
 
-int main(){
-    DesktopComputerBuilder desktopComputerBuilder;
-    ComputerAssembler assembler;
-    Computer desktop = assembler.assembleComputer(desktopComputerBuilder);
+class Circle : public Shape {
+public:
+    Circle(Renderer& renderer)
+        : renderer(renderer)
+    {
+    }
 
-    std::cout << "Desktop Computer Configuration: " << std::endl;
-    desktop.display();
+    void draw() override
+    {
+        std::cout << "Drawing a circle ";
+        renderer.render();
+    }
+
+private:
+    Renderer& renderer;
+};
+
+class Square : public Shape {
+public:
+    Square(Renderer& renderer)
+        : renderer(renderer)
+    {
+    }
+
+    void draw() override
+    {
+        std::cout << "Drawing a square ";
+        renderer.render();
+    }
+
+private:
+    Renderer& renderer;
+};
+
+int main()
+{
+    VectorRenderer vectorRenderer;
+    RasterRenderer rasterRenderer;
+
+    Circle circle(vectorRenderer);
+    Square square(rasterRenderer);
+
+    circle.draw();
+    square.draw();
+
+    return 0;
 }
